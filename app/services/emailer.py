@@ -5,7 +5,7 @@ from app.config import RESEND_API_KEY, APP_URL
 resend.api_key = RESEND_API_KEY
 logger = logging.getLogger(__name__)
 
-FROM_EMAIL = "RegWatch <alertes@regwatch.app>"
+FROM_EMAIL = "RegWatch <onboarding@resend.dev>"
 
 def send_welcome(email: str, nom: str, plan: str):
     try:
