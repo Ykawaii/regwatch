@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RegWatch — Tableau de bord</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
+header{background:#1a2744;padding:0 24px;display:flex;align-items:center;gap:16px;height:56px}
+.logo{color:#1D9E75;font-weight:700;font-size:16px;letter-spacing:.05em}
+.user-info{color:#aab4c8;font-size:13px;flex:1}
+.btn-logout{color:#aab4c8;font-size:12px;text-decoration:none;border:1px solid #2d3f6e;padding:4px 12px;border-radius:4px}
+.btn-logout:hover{color:white}
+.container{max-width:900px;margin:0 auto;padding:24px 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:white;border-radius:8px;padding:16px;border:0.5px solid #e8e8e8}
+.stat-n{font-size:28px;font-weight:600;color:#1a2744}
+.stat-l{font-size:12px;color:#888;margin-top:2px}
+.card{background:white;border-radius:8px;border:0.5px solid #e8e8e8;margin-bottom:16px;overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:15px;font-weight:600;color:#1a2744}
+.card-body{padding:8px 0}
+.texte-item{padding:14px 20px;border-bottom:1px solid #f8f8f8;display:flex;gap:12px;align-items:flex-start}
+.texte-item:last-child{border-bottom:none}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.badge-urgent{background:#FCEBEB;color:#A32D2D}
+.badge-important{background:#E1F5EE;color:#085041}
+.badge-noter{background:#F1EFE8;color:#5F5E5A}
+.texte-content{flex:1;min-width:0}
+.texte-titre{font-size:14px;font-weight:600;color:#1a2744;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.texte-resume{font-size:12px;color:#666;line-height:1.5;margin-bottom:6px}
+.texte-resume p{margin:0 0 4px}
+.texte-meta{display:flex;gap:12px;align-items:center}
+.texte-source{font-size:11px;color:#999}
+.texte-link{font-size:11px;color:#1D9E75;text-decoration:none}
+.texte-link:hover{text-decoration:underline}
+.empty{padding:32px;text-align:center;color:#999;font-size:14px}
+.rapport-item{padding:12px 20px;border-bottom:1px solid #f8f8f8;display:flex;align-items:center;justify-content:space-between}
+.rapport-item:last-child{border-bottom:none}
+.rapport-date{font-size:13px;color:#333}
+.rapport-status{font-size:11px;color:#1D9E75}
+.secteur-tag{display:inline-block;background:#EEEDFE;color:#3C3489;font-size:11px;padding:2px 8px;border-radius:999px;margin:2px}
+.plan-badge{font-size:11px;background:#E1F5EE;color:#085041;padding:3px 10px;border-radius:999px;font-weight:600}
+.loading{padding:32px;text-align:center;color:#999}
+.spinner{width:20px;height:20px;border:2px solid #e8e8e8;border-top-color:#1D9E75;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">REGWATCH</span>
+  <span class="user-info" id="user-email">Chargement...</span>
+  <a href="/auth/logout" class="btn-logout">Déconnexion</a>
+</header>
+
+<div class="container">
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-n" id="s-alertes">—</div><div class="stat-l">Alertes totales</div></div>
+    <div class="stat"><div class="stat-n" id="s-urgentes" style="color:#E24B4A">—</div><div class="stat-l">Urgentes</div></div>
+    <div class="stat"><div class="stat-n" id="s-rapports">—</div><div class="stat-l">Rapports envoyés</div></div>
+    <div class="stat">
+      <div id="s-plan" class="plan-badge" style="font-size:14px;display:inline-block;margin-bottom:4px">—</div>
+      <div class="stat-l" id="s-secteurs">secteurs surveillés</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Textes de la semaine</span>
+      <span id="textes-count" style="font-size:12px;color:#999"></span>
+    </div>
+    <div class="card-body" id="textes-list">
+      <div class="loading"><span class="spinner"></span>Chargement des textes...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Historique des rapports</span></div>
+    <div class="card-body" id="rapports-list">
+      <div class="loading"><span class="spinner"></span>Chargement...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function load() {
+  try {
+    const [stats, textes, rapports] = await Promise.all([
+      fetch('/api/stats').then(r => r.json()),
+      fetch('/api/textes').then(r => r.json()),
+      fetch('/api/rapports').then(r => r.json()),
+    ]);
+
+    document.getElementById('user-email').textContent = stats.secteurs?.join(', ') || 'Mon compte';
+    document.getElementById('s-alertes').textContent = stats.total_alertes;
+    document.getElementById('s-urgentes').textContent = stats.alertes_urgentes;
+    document.getElementById('s-rapports').textContent = stats.rapports_envoyes;
+    document.getElementById('s-plan').textContent = stats.plan?.toUpperCase() || '—';
+    document.getElementById('s-secteurs').textContent = (stats.secteurs || []).map(s =>
+      `<span class="secteur-tag">${s}</span>`).join('') || 'Aucun secteur configuré';
+
+    document.getElementById('textes-count').textContent = `${textes.length} textes`;
+    if (textes.length === 0) {
+      document.getElementById('textes-list').innerHTML = '<div class="empty">Aucun texte pertinent cette semaine.<br>RegWatch surveille en continu.</div>';
+    } else {
+      document.getElementById('textes-list').innerHTML = textes.map(t => {
+        const score = t.score || 5;
+        const badgeClass = score >= 9 ? 'badge-urgent' : score >= 7 ? 'badge-important' : 'badge-noter';
+        const badgeText = score >= 9 ? `URGENT ${score}/10` : score >= 7 ? `IMPORTANT ${score}/10` : `À NOTER ${score}/10`;
+        const resume = t.resume_ia ? t.resume_ia.replace(/<[^>]+>/g,'').substring(0,180) + '...' : '';
+        return `<div class="texte-item">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="texte-content">
+            <div class="texte-titre">${t.titre || ''}</div>
+            ${resume ? `<div class="texte-resume">${resume}</div>` : ''}
+            <div class="texte-meta">
+              <span class="texte-source">${t.source || ''} · ${t.date_publication || ''}</span>
+              <a href="${t.url || '#'}" target="_blank" class="texte-link">Texte officiel →</a>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    if (!rapports.length) {
+      document.getElementById('rapports-list').innerHTML = '<div class="empty">Aucun rapport encore envoyé.</div>';
+    } else {
+      document.getElementById('rapports-list').innerHTML = rapports.map(r => {
+        const date = r.semaine_debut ? new Date(r.semaine_debut).toLocaleDateString('fr-FR') : '—';
+        return `<div class="rapport-item">
+          <span class="rapport-date">Semaine du ${date}</span>
+          <span class="rapport-status">${r.envoyee ? '✓ Envoyé' : 'En attente'}</span>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    if (e.status === 401 || (e.message && e.message.includes('401'))) {
+      window.location.href = '/login';
+    }
+  }
+}
+
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
