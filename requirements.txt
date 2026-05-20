@@ -3,7 +3,7 @@ uvicorn==0.29.0
 playwright==1.44.0
 beautifulsoup4==4.12.3
 httpx==0.27.0
-supabase==2.15.2
+supabase>=2.7.0
 anthropic==0.28.0
 resend==2.0.0
 python-dotenv==1.0.1

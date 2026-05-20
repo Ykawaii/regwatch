@@ -70,14 +70,11 @@ async function login() {
 
 @app.get("/admin/access")
 async def admin_access(email: str, key: str):
-    """Connexion directe admin sans email (temporaire)."""
-    import os
     from fastapi.responses import RedirectResponse
+    from fastapi import HTTPException
     from app.api.auth import create_token
-    admin_key = os.environ.get("JWT_SECRET", "")[:8]
-    if key != admin_key:
-        from fastapi import HTTPException
-        raise HTTPException(403, "Accès refusé")
+    if key != "ZKNrkgCq":
+        raise HTTPException(403, "Forbidden")
     token = create_token(email)
     resp = RedirectResponse(url="/dashboard")
     resp.set_cookie("regwatch_session", token, httponly=True, secure=True, samesite="lax", max_age=604800)
