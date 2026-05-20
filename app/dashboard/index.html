@@ -6,80 +6,192 @@
 <title>RegWatch — Tableau de bord</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
-header{background:#1a2744;padding:0 24px;display:flex;align-items:center;gap:16px;height:56px}
-.logo{color:#1D9E75;font-weight:700;font-size:16px;letter-spacing:.05em}
-.user-info{color:#aab4c8;font-size:13px;flex:1}
-.btn-logout{color:#aab4c8;font-size:12px;text-decoration:none;border:1px solid #2d3f6e;padding:4px 12px;border-radius:4px}
-.btn-logout:hover{color:white}
-.container{max-width:900px;margin:0 auto;padding:24px 16px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.stat{background:white;border-radius:8px;padding:16px;border:0.5px solid #e8e8e8}
-.stat-n{font-size:28px;font-weight:600;color:#1a2744}
-.stat-l{font-size:12px;color:#888;margin-top:2px}
-.card{background:white;border-radius:8px;border:0.5px solid #e8e8e8;margin-bottom:16px;overflow:hidden}
-.card-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
-.card-title{font-size:15px;font-weight:600;color:#1a2744}
-.card-body{padding:8px 0}
-.texte-item{padding:14px 20px;border-bottom:1px solid #f8f8f8;display:flex;gap:12px;align-items:flex-start}
+:root{--navy:#1a2744;--green:#1D9E75;--green-light:#E1F5EE;--red:#E24B4A;--red-light:#FCEBEB;--gray:#f7f8fa;--border:#eaecf0;--text:#111827;--muted:#6b7280}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f6f9;color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--navy);display:flex;flex-direction:column;z-index:50}
+.sidebar-logo{padding:24px 20px 20px;color:var(--green);font-weight:800;font-size:16px;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.07)}
+.sidebar-nav{flex:1;padding:16px 10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#8a9bbf;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.07);color:white}
+.nav-item.active{background:rgba(29,158,117,.18);color:#4ecba0}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.07)}
+.user-box{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:rgba(29,158,117,.25);color:var(--green);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-email{font-size:12px;color:#6b7a99;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{font-size:11px;color:#4a5a7a;text-decoration:none;margin-top:8px;display:block;transition:color .2s}
+.btn-logout:hover{color:#aab4c8}
+
+/* MAIN */
+.main{margin-left:220px;min-height:100vh;padding:28px 32px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-title{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.01em}
+.page-subtitle{font-size:13.5px;color:var(--muted);margin-top:2px}
+.plan-chip{display:inline-flex;align-items:center;gap:5px;background:var(--green-light);color:#0F6E56;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;letter-spacing:.05em}
+.plan-chip::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px}
+.stat{background:white;border-radius:12px;padding:20px;border:1px solid var(--border);position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)}
+.stat.urgent::before{background:var(--red)}
+.stat-icon{font-size:20px;margin-bottom:10px}
+.stat-n{font-size:30px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:4px}
+.stat.urgent .stat-n{color:var(--red)}
+.stat-l{font-size:12px;color:var(--muted);font-weight:500}
+
+/* CARDS */
+.grid-2{display:grid;grid-template-columns:1fr 380px;gap:20px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+.card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.card-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14.5px;font-weight:700;color:var(--navy)}
+.card-count{font-size:12px;color:var(--muted);background:#f4f6f9;padding:3px 9px;border-radius:999px}
+
+/* TEXTES */
+.texte-item{padding:16px 20px;border-bottom:1px solid #f5f5f5;display:flex;gap:12px;transition:background .15s}
 .texte-item:last-child{border-bottom:none}
-.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px}
-.badge-urgent{background:#FCEBEB;color:#A32D2D}
-.badge-important{background:#E1F5EE;color:#085041}
-.badge-noter{background:#F1EFE8;color:#5F5E5A}
+.texte-item:hover{background:#fafafa}
+.badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:.04em}
+.badge-urgent{background:var(--red-light);color:#a32d2d}
+.badge-important{background:var(--green-light);color:#085041}
+.badge-noter{background:#f1f0e8;color:#5f5e5a}
 .texte-content{flex:1;min-width:0}
-.texte-titre{font-size:14px;font-weight:600;color:#1a2744;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.texte-resume{font-size:12px;color:#666;line-height:1.5;margin-bottom:6px}
-.texte-resume p{margin:0 0 4px}
-.texte-meta{display:flex;gap:12px;align-items:center}
-.texte-source{font-size:11px;color:#999}
-.texte-link{font-size:11px;color:#1D9E75;text-decoration:none}
+.texte-titre{font-size:13.5px;font-weight:600;color:var(--navy);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.texte-resume{font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:7px}
+.texte-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.texte-source{font-size:11px;color:#bbb}
+.texte-link{font-size:11.5px;color:var(--green);text-decoration:none;font-weight:600}
 .texte-link:hover{text-decoration:underline}
-.empty{padding:32px;text-align:center;color:#999;font-size:14px}
-.rapport-item{padding:12px 20px;border-bottom:1px solid #f8f8f8;display:flex;align-items:center;justify-content:space-between}
+
+/* RAPPORTS */
+.rapport-item{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;justify-content:space-between}
 .rapport-item:last-child{border-bottom:none}
-.rapport-date{font-size:13px;color:#333}
-.rapport-status{font-size:11px;color:#1D9E75}
-.secteur-tag{display:inline-block;background:#EEEDFE;color:#3C3489;font-size:11px;padding:2px 8px;border-radius:999px;margin:2px}
-.plan-badge{font-size:11px;background:#E1F5EE;color:#085041;padding:3px 10px;border-radius:999px;font-weight:600}
-.loading{padding:32px;text-align:center;color:#999}
-.spinner{width:20px;height:20px;border:2px solid #e8e8e8;border-top-color:#1D9E75;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;margin-right:8px;vertical-align:middle}
+.rapport-date{font-size:13.5px;color:var(--text);font-weight:500}
+.rapport-sent{font-size:11.5px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px}
+.rapport-sent::before{content:'✓';font-weight:800}
+.rapport-pending{font-size:11.5px;color:var(--muted)}
+
+/* SECTEURS */
+.secteur-card{background:white;border-radius:14px;border:1px solid var(--border);padding:20px;margin-top:20px}
+.secteur-title{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.secteur-tags{display:flex;flex-wrap:wrap;gap:8px}
+.secteur-tag{background:#eeedfe;color:#3c3489;font-size:12px;padding:5px 12px;border-radius:999px;font-weight:600}
+
+/* EMPTY / LOADING */
+.empty{padding:40px 24px;text-align:center;color:var(--muted);font-size:14px;line-height:1.7}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.5}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #e8e8e8;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:16px}
+  .stats{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
-<header>
-  <span class="logo">REGWATCH</span>
-  <span class="user-info" id="user-email">Chargement...</span>
-  <a href="/auth/logout" class="btn-logout">Déconnexion</a>
-</header>
 
-<div class="container">
-  <div class="stats" id="stats">
-    <div class="stat"><div class="stat-n" id="s-alertes">—</div><div class="stat-l">Alertes totales</div></div>
-    <div class="stat"><div class="stat-n" id="s-urgentes" style="color:#E24B4A">—</div><div class="stat-l">Urgentes</div></div>
-    <div class="stat"><div class="stat-n" id="s-rapports">—</div><div class="stat-l">Rapports envoyés</div></div>
+<div class="sidebar">
+  <div class="sidebar-logo">REGWATCH</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" href="/dashboard">
+      <span class="nav-icon">📊</span> Tableau de bord
+    </a>
+    <a class="nav-item" href="#textes">
+      <span class="nav-icon">📋</span> Textes réglementaires
+    </a>
+    <a class="nav-item" href="#rapports">
+      <span class="nav-icon">📄</span> Rapports
+    </a>
+    <a class="nav-item" href="#secteurs">
+      <span class="nav-icon">⚙️</span> Mes secteurs
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-box">
+      <div class="user-avatar" id="user-initial">—</div>
+      <div class="user-email" id="user-email">Chargement...</div>
+    </div>
+    <a href="/auth/logout" class="btn-logout">Se déconnecter</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Tableau de bord</div>
+      <div class="page-subtitle" id="page-sub">Chargement...</div>
+    </div>
+    <div class="plan-chip" id="plan-chip">—</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
     <div class="stat">
-      <div id="s-plan" class="plan-badge" style="font-size:14px;display:inline-block;margin-bottom:4px">—</div>
-      <div class="stat-l" id="s-secteurs">secteurs surveillés</div>
+      <div class="stat-icon">🔔</div>
+      <div class="stat-n" id="s-alertes">—</div>
+      <div class="stat-l">Alertes reçues</div>
+    </div>
+    <div class="stat urgent">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-n" id="s-urgentes">—</div>
+      <div class="stat-l">Alertes urgentes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">📬</div>
+      <div class="stat-n" id="s-rapports">—</div>
+      <div class="stat-l">Rapports envoyés</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-n" id="s-secteurs-count">—</div>
+      <div class="stat-l">Secteurs surveillés</div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Textes de la semaine</span>
-      <span id="textes-count" style="font-size:12px;color:#999"></span>
-    </div>
-    <div class="card-body" id="textes-list">
-      <div class="loading"><span class="spinner"></span>Chargement des textes...</div>
-    </div>
-  </div>
+  <!-- MAIN GRID -->
+  <div class="grid-2">
 
-  <div class="card">
-    <div class="card-header"><span class="card-title">Historique des rapports</span></div>
-    <div class="card-body" id="rapports-list">
-      <div class="loading"><span class="spinner"></span>Chargement...</div>
+    <!-- TEXTES -->
+    <div id="textes">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Textes de la semaine</span>
+          <span class="card-count" id="textes-count">...</span>
+        </div>
+        <div id="textes-list">
+          <div class="loading"><span class="spinner"></span>Chargement des textes...</div>
+        </div>
+      </div>
     </div>
+
+    <!-- RIGHT COL -->
+    <div>
+      <!-- RAPPORTS -->
+      <div class="card" id="rapports">
+        <div class="card-header">
+          <span class="card-title">Historique des rapports</span>
+        </div>
+        <div id="rapports-list">
+          <div class="loading"><span class="spinner"></span>Chargement...</div>
+        </div>
+      </div>
+
+      <!-- SECTEURS -->
+      <div class="secteur-card" id="secteurs">
+        <div class="secteur-title">⚙️ Mes secteurs surveillés</div>
+        <div class="secteur-tags" id="secteur-tags">
+          <span style="font-size:13px;color:var(--muted)">Chargement...</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -87,57 +199,82 @@ header{background:#1a2744;padding:0 24px;display:flex;align-items:center;gap:16p
 async function load() {
   try {
     const [stats, textes, rapports] = await Promise.all([
-      fetch('/api/stats').then(r => r.json()),
+      fetch('/api/stats').then(r => { if(!r.ok) throw {status:r.status}; return r.json(); }),
       fetch('/api/textes').then(r => r.json()),
       fetch('/api/rapports').then(r => r.json()),
     ]);
 
-    document.getElementById('user-email').textContent = stats.secteurs?.join(', ') || 'Mon compte';
-    document.getElementById('s-alertes').textContent = stats.total_alertes;
-    document.getElementById('s-urgentes').textContent = stats.alertes_urgentes;
-    document.getElementById('s-rapports').textContent = stats.rapports_envoyes;
-    document.getElementById('s-plan').textContent = stats.plan?.toUpperCase() || '—';
-    document.getElementById('s-secteurs').textContent = (stats.secteurs || []).map(s =>
-      `<span class="secteur-tag">${s}</span>`).join('') || 'Aucun secteur configuré';
+    // Header
+    const email = stats.secteurs?.length ? stats.secteurs.join(', ') : 'Mon compte';
+    document.getElementById('user-email').textContent = email;
+    document.getElementById('user-initial').textContent = email[0]?.toUpperCase() || '?';
+    document.getElementById('page-sub').textContent = `Dernière mise à jour aujourd'hui à 6h00`;
+    document.getElementById('plan-chip').textContent = (stats.plan || 'starter').toUpperCase();
 
-    document.getElementById('textes-count').textContent = `${textes.length} textes`;
-    if (textes.length === 0) {
-      document.getElementById('textes-list').innerHTML = '<div class="empty">Aucun texte pertinent cette semaine.<br>RegWatch surveille en continu.</div>';
+    // Stats
+    document.getElementById('s-alertes').textContent = stats.total_alertes ?? '0';
+    document.getElementById('s-urgentes').textContent = stats.alertes_urgentes ?? '0';
+    document.getElementById('s-rapports').textContent = stats.rapports_envoyes ?? '0';
+    document.getElementById('s-secteurs-count').textContent = (stats.secteurs || []).length;
+
+    // Secteurs
+    const tags = (stats.secteurs || []);
+    document.getElementById('secteur-tags').innerHTML = tags.length
+      ? tags.map(s => `<span class="secteur-tag">${s}</span>`).join('')
+      : `<span style="font-size:13px;color:var(--muted)">Aucun secteur configuré</span>`;
+
+    // Textes
+    document.getElementById('textes-count').textContent = `${textes.length} texte${textes.length>1?'s':''}`;
+    if (!textes.length) {
+      document.getElementById('textes-list').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          Aucun texte pertinent cette semaine.<br>
+          <span style="font-size:12px">RegWatch surveille en continu — le prochain rapport arrive lundi.</span>
+        </div>`;
     } else {
       document.getElementById('textes-list').innerHTML = textes.map(t => {
         const score = t.score || 5;
-        const badgeClass = score >= 9 ? 'badge-urgent' : score >= 7 ? 'badge-important' : 'badge-noter';
-        const badgeText = score >= 9 ? `URGENT ${score}/10` : score >= 7 ? `IMPORTANT ${score}/10` : `À NOTER ${score}/10`;
-        const resume = t.resume_ia ? t.resume_ia.replace(/<[^>]+>/g,'').substring(0,180) + '...' : '';
+        const bc = score >= 9 ? 'badge-urgent' : score >= 7 ? 'badge-important' : 'badge-noter';
+        const bt = score >= 9 ? `⚡ URGENT ${score}/10` : score >= 7 ? `IMPORTANT ${score}/10` : `À NOTER ${score}/10`;
+        const resume = t.resume_ia ? t.resume_ia.replace(/<[^>]+>/g,'').substring(0,160) + '…' : '';
+        const date = t.date_publication ? new Date(t.date_publication).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '';
         return `<div class="texte-item">
-          <span class="badge ${badgeClass}">${badgeText}</span>
+          <span class="badge ${bc}">${bt}</span>
           <div class="texte-content">
-            <div class="texte-titre">${t.titre || ''}</div>
+            <div class="texte-titre" title="${t.titre||''}">${t.titre||''}</div>
             ${resume ? `<div class="texte-resume">${resume}</div>` : ''}
             <div class="texte-meta">
-              <span class="texte-source">${t.source || ''} · ${t.date_publication || ''}</span>
-              <a href="${t.url || '#'}" target="_blank" class="texte-link">Texte officiel →</a>
+              <span class="texte-source">${t.source||''} ${date ? '· '+date : ''}</span>
+              <a href="${t.url||'#'}" target="_blank" rel="noopener" class="texte-link">Texte officiel →</a>
             </div>
           </div>
         </div>`;
       }).join('');
     }
 
+    // Rapports
     if (!rapports.length) {
-      document.getElementById('rapports-list').innerHTML = '<div class="empty">Aucun rapport encore envoyé.</div>';
+      document.getElementById('rapports-list').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          Aucun rapport encore.<br>
+          <span style="font-size:12px">Le premier arrivera lundi matin.</span>
+        </div>`;
     } else {
       document.getElementById('rapports-list').innerHTML = rapports.map(r => {
-        const date = r.semaine_debut ? new Date(r.semaine_debut).toLocaleDateString('fr-FR') : '—';
+        const date = r.semaine_debut ? new Date(r.semaine_debut).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '—';
         return `<div class="rapport-item">
           <span class="rapport-date">Semaine du ${date}</span>
-          <span class="rapport-status">${r.envoyee ? '✓ Envoyé' : 'En attente'}</span>
+          ${r.envoyee
+            ? `<span class="rapport-sent">Envoyé</span>`
+            : `<span class="rapport-pending">En attente</span>`}
         </div>`;
       }).join('');
     }
+
   } catch(e) {
-    if (e.status === 401 || (e.message && e.message.includes('401'))) {
-      window.location.href = '/login';
-    }
+    if (e?.status === 401) window.location.href = '/login';
   }
 }
 
